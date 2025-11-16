@@ -11,10 +11,10 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List, Literal
 
-# Example schemas (replace with your own):
+# Example schemas (kept for reference):
 
 class User(BaseModel):
     """
@@ -38,8 +38,40 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# App-specific schemas
+
+class UserProfile(BaseModel):
+    """User profile and base info"""
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    resume_text: Optional[str] = Field(None, description="Parsed resume text or paste-in")
+
+class JobPreference(BaseModel):
+    """Preferences for job discovery"""
+    titles: List[str] = Field(default_factory=list)
+    locations: List[str] = Field(default_factory=list)
+    remote: bool = True
+    include_keywords: List[str] = Field(default_factory=list)
+    exclude_keywords: List[str] = Field(default_factory=list)
+
+class JobPosting(BaseModel):
+    """Discovered job posting summary"""
+    title: str
+    company: Optional[str] = None
+    url: str
+    snippet: Optional[str] = None
+    source: Literal["google_cse", "manual"] = "google_cse"
+
+class Application(BaseModel):
+    """An application record"""
+    job_title: str
+    company: Optional[str] = None
+    job_url: str
+    applicant_email: EmailStr
+    status: Literal["queued", "applied", "followup_scheduled", "followup_sent", "error"] = "queued"
+    cover_letter: Optional[str] = None
+    notes: Optional[str] = None
 
 # Note: The Flames database viewer will automatically:
 # 1. Read these schemas from GET /schema endpoint
